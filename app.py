@@ -1,48 +1,40 @@
-
 import streamlit as st
-import joblib
 import pandas as pd
+import joblib
+import numpy as np
 
 # Load model
-model = joblib.load('random_forest_model.joblib')
+model = joblib.load("random_forest_model.joblib")
 
-st.title("Tourism Rating Prediction System")
+st.title("Tourism Rating Prediction")
 
-st.header("Enter Input Features")
+st.write("Enter feature values for prediction")
 
-# Input fields
-VisitYear = st.number_input("Visit Year")
+# Get exact feature names from trained model
+feature_names = model.feature_names_in_
 
-VisitMonth = st.number_input("Visit Month")
+# Store inputs
+values = []
 
-VisitMode = st.number_input("Visit Mode")
+# Create dynamic input fields
+for feature in feature_names:
 
-AttractionPopularity = st.number_input("Attraction Popularity")
+    value = st.number_input(
+        f"{feature}",
+        value=0.0
+    )
 
-AvgUserRating = st.number_input("Average User Rating")
+    values.append(value)
 
-UserVisitCount = st.number_input("User Visit Count")
+# Create dataframe EXACTLY matching training format
+input_data = pd.DataFrame(
+    np.array(values).reshape(1, -1),
+    columns=feature_names
+)
 
-# Create dataframe with SAME feature names
-input_data = pd.DataFrame({
+# Predict button
+if st.button("Predict"):
 
-    'VisitYear':[VisitYear],
+    prediction = model.predict(input_data)
 
-    'VisitMonth':[VisitMonth],
-
-    'VisitMode':[VisitMode],
-
-    'AttractionPopularity':[AttractionPopularity],
-
-    'AvgUserRating':[AvgUserRating],
-
-    'UserVisitCount':[UserVisitCount]
-
-})
-
-# Prediction
-prediction = model.predict(input_data)
-
-st.subheader("Predicted Rating")
-
-st.write(prediction[0])
+    st.success(f"Predicted Rating: {prediction[0]}")
